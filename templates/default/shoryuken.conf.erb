@@ -14,14 +14,17 @@
 
 description "Shoryuken Upstart process"
 
+<% if node[:platform] != 'amazon' %>
 start on started network-services
 stop on stopping network-services
 
 # change to match your deployment user
-# Amazon Linux AMI users: the two lines below must be omitted as
-# Upstart 0.6.5 does not support the `setuid` and `setgid` commands.
 setuid <%= @user %>
 setgid <%= @group %>
+<% else %>
+start on started network
+stop on stopping network
+<% end %>
 
 respawn
 respawn limit 3 30
@@ -37,6 +40,16 @@ env RAILS_ENV=<%= @rails_env %>
 env <%= k %>=<%= (v || '').to_s.gsub('"', '\\"') %>
 <% end %>
 
+# Amazon Linux AMI users: Upstart 0.6.5 does not support `setuid` and `setgid` commands.
+# Instead, use `setuidguid` provided by daemontools.
+# Be sure that daemontools is already installed before running this recipe.
 script
+<% if node[:platform] != 'amazon' %>
   exec <%= @start_command %>
+<% else %>
+  # Bundler needs $HOME to run but Upstart doesn't set this.
+  # Set the home directory of the user who runs shoryuken.
+  export HOME=<%= `getent passwd #{@user}`.split(':')[5] %>
+  exec setuidgid <%= @user %> <%= @start_command %>
+<% end %>
 end script

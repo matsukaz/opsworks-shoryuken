@@ -23,7 +23,7 @@ The command to start shoryuken.  This will run relative to the root of the curre
 Defaults to:
 
 ```bash
-bundle exec shoryuken -R -C config/shoryuken.yml 2>&1 >> log/shoryuken.log
+bundle exec shoryuken -R -L log/shoryuken.log -C config/shoryuken.yml
 ```
 
 ### Sample Chef JSON configuration
@@ -48,7 +48,7 @@ Here is an example Custom JSON which overrides overrides the start_command to no
   "deploy": {
     "your_app_name": {
       "shoryuken": {
-        "start_command": "bundle exec shoryuken -C config/shoryuken.yml -r ./config/boot.rb 2>&1 >> log/shoryuken.log"
+        "start_command": "bundle exec shoryuken -R -L log/shoryuken.log -C config/shoryuken.yml"
       }
     }
   }
